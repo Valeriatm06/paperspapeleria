@@ -16,6 +16,7 @@ import java.util.Set;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -104,5 +105,25 @@ class UserControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.identificacion").value(userId))
         .andExpect(jsonPath("$.nombres").value("Usuario de Prueba"));
+    }
+
+    @Test
+    void testUpDateUser() throws Exception {
+        String userId = "12345";
+        UserDTO userUpDateDTO = new UserDTO();
+        userUpDateDTO.setIdentificacion(userId);
+        userUpDateDTO.setNombres("Nombre Editado");
+        userUpDateDTO.setEmail("editado@correo.com");
+        userUpDateDTO.setRoles(Set.of("CLIENTE"));
+        when(userService.upDateUser(any(String.class), any(UserDTO.class)))
+                .thenReturn(userUpDateDTO);
+        mockMvc.perform(
+                put("/api/usuarios/" + userId) 
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(userUpDateDTO))
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.nombres").value("Nombre Editado"))
+        .andExpect(jsonPath("$.email").value("editado@correo.com"));
     }
 }

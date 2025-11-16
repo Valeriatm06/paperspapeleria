@@ -118,4 +118,44 @@ public class UserServiceImpl implements UserService {
         return convertTOEntityDTO(user);
     }
 
+    @Override
+    public UserDTO upDateUser(String id, UserDTO userDTO) {
+        User actualUser = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Tercero no encontrado con ID: " + id));
+
+        Set<String> askedRoles = userDTO.getRoles();
+        if (askedRoles.contains("ADMINISTRADOR") && askedRoles.contains("EMPLEADO")) {
+            throw new IllegalArgumentException("Error: Una persona no puede ser Administrador y Empleado al mismo tiempo.");
+        }
+        
+        actualUser.setPersonType(userDTO.getTipoPersona());
+        actualUser.setIdType(userDTO.getTipoIdentificacion());
+        actualUser.setNames(userDTO.getNombres());
+        actualUser.setLastNames(userDTO.getApellidos());
+        actualUser.setCity(userDTO.getCiudad());
+        actualUser.setAddress(userDTO.getDireccion());
+        actualUser.setContactName(userDTO.getNombresContacto());
+        actualUser.setContactLastName(userDTO.getApellidosContacto());
+        actualUser.setEmail(userDTO.getEmail());
+        actualUser.setPhoneNumber(userDTO.getTelefono());
+        actualUser.setActive(userDTO.isActive());
+
+        Set<Rol> entityRoles = new HashSet<>();
+        for (String rolName : askedRoles) {
+            Rol rol = rolRepository.findByName(rolName)
+                    .orElseThrow(() -> new EntityNotFoundException("El rol '" + rolName + "' no existe."));
+            entityRoles.add(rol);
+        }
+        actualUser.setRols(entityRoles);
+
+        if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
+            actualUser.setPassword(userDTO.getPassword());
+        }
+        actualUser.setUsername(userDTO.getUsername());
+
+        User upDatedUser = userRepository.save(actualUser);
+
+        return convertTOEntityDTO(upDatedUser);
+    }
+
 }
