@@ -1,8 +1,10 @@
 package com.papers.paperspapeleria.service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Set;
+import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -98,6 +100,14 @@ public class UserServiceImpl implements UserService {
         );
 
         return dto;
+    }
+
+    @Override
+    public List<UserDTO> listUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .map(this::convertTOEntityDTO)
+                .collect(Collectors.toList());
     }
 
 }

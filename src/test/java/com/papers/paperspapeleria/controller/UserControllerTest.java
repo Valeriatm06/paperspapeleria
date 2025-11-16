@@ -10,10 +10,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
 import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -28,7 +31,7 @@ class UserControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private UserService terceroService;
+    private UserService userService;
 
     @Test
     void testCreateUser() throws Exception {
@@ -46,7 +49,7 @@ class UserControllerTest {
         userSaved.setEmail("juan@correo.com");
         userSaved.setRoles(Set.of("CLIENTE"));
         userSaved.setActive(true);
-        when(terceroService.createUser(any(UserDTO.class)))
+        when(userService.createUser(any(UserDTO.class)))
                 .thenReturn(userSaved);
 
         mockMvc.perform(
@@ -59,5 +62,27 @@ class UserControllerTest {
         .andExpect(jsonPath("$.nombres").value("Juan"))
         .andExpect(jsonPath("$.active").value(true))
         .andExpect(jsonPath("$.roles[0]").value("CLIENTE"));
+    }
+
+    @Test
+    void testListUsers() throws Exception {
+        UserDTO user1 = new UserDTO();
+        user1.setIdentificacion("111");
+        user1.setNombres("Usuario Uno");
+
+        UserDTO user2 = new UserDTO();
+        user2.setIdentificacion("222");
+        user2.setNombres("Usuario Dos");
+
+        when(userService.listUsers())
+                .thenReturn(List.of(user1, user2));
+        mockMvc.perform(
+                get("/api/usuarios")
+                    .contentType(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$[0].identificacion").value("111"))
+        .andExpect(jsonPath("$[0].nombres").value("Usuario Uno"));
     }
 }

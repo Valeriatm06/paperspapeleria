@@ -1,5 +1,7 @@
 package com.papers.paperspapeleria.controller;
 
+import java.util.List;
+
 import com.papers.paperspapeleria.dto.UserDTO;
 import com.papers.paperspapeleria.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,5 +22,10 @@ public class UserController {
     public UserDTO crearTercero(@RequestBody UserDTO userDTO) {
         
         return userService.createUser(userDTO);
+    }
+
+    @GetMapping
+    public List<UserDTO> listarUsers() {
+        return userService.listUsers();
     }
 }
