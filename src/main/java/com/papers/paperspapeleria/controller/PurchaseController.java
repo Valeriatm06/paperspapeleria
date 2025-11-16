@@ -2,9 +2,12 @@ package com.papers.paperspapeleria.controller;
 
 import com.papers.paperspapeleria.dto.PurchaseDTO;
 import com.papers.paperspapeleria.service.PurchaseService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/compras")
@@ -22,5 +25,28 @@ public class PurchaseController {
     public PurchaseDTO createPurchase(@RequestBody PurchaseDTO purchaseDTO) {
         return purchaseService.createPurchase(purchaseDTO);
     }
+    
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<PurchaseDTO> getAllPurchases() {
+        return purchaseService.getAllPurchases();
+    }
 
+    @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public PurchaseDTO getPurchaseById(@PathVariable Long id) {
+        return purchaseService.getPurchaseById(id);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePurchase(@PathVariable Long id) {
+        purchaseService.deletePurchase(id);
+    }
+
+    @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public PurchaseDTO updatePurchase(@PathVariable Long id, @RequestBody PurchaseDTO purchaseDTO) {
+        return purchaseService.updatePurchase(id, purchaseDTO);
+    }
 }

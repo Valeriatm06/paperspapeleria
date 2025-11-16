@@ -10,6 +10,7 @@ import com.papers.paperspapeleria.repository.ProductRepository;
 import com.papers.paperspapeleria.repository.PurchaseRepository;
 import com.papers.paperspapeleria.repository.UserRepository; // Importa tu UserRepository
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional; 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PurchaseServiceImpl implements PurchaseService {
@@ -98,4 +100,66 @@ public class PurchaseServiceImpl implements PurchaseService {
         dto.setSubtotal(detail.getSubtotal());
         return dto;
     }
+
+	@Override
+	public List<PurchaseDTO> getAllPurchases() {
+		List<Purchase> purchases = purchaseRepository.findAll();
+        return purchases.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+	}
+
+	@Override
+	public PurchaseDTO getPurchaseById(Long id) {
+		Purchase purchase = purchaseRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Compra no encontrada con ID: " + id));
+        return convertToDTO(purchase);
+	}
+
+	@Override
+    @Transactional
+	public PurchaseDTO updatePurchase(Long id, PurchaseDTO purchaseDTO) {
+		Purchase actualPurchase = purchaseRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Compra no encontrada con ID: " + id));
+
+        if (purchaseDTO.getUserId() != null &&
+            !purchaseDTO.getUserId().equals(actualPurchase.getSupplier().getIdentification())) {
+            
+            User newSupplier = userRepository.findById(purchaseDTO.getUserId())
+                    .orElseThrow(() -> new EntityNotFoundException("Proveedor (Tercero) no encontrado con ID: " + purchaseDTO.getUserId()));
+            
+            actualPurchase.setSupplier(newSupplier);
+        }
+        
+        if (purchaseDTO.getTotalValue() != null) {
+            actualPurchase.setTotalValue(purchaseDTO.getTotalValue());
+        }
+        if (purchaseDTO.getTaxes() != null) {
+            actualPurchase.setTaxes(purchaseDTO.getTaxes());
+        }
+        if (purchaseDTO.getDiscounts() != null) {
+            actualPurchase.setDiscounts(purchaseDTO.getDiscounts());
+        }
+
+        Purchase savedPurchase = purchaseRepository.save(actualPurchase);
+        return convertToDTO(savedPurchase);
+	}
+
+	@Override
+    @Transactional
+	public void deletePurchase(Long id) {
+		Purchase purchase = purchaseRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Compra no encontrada con ID: " + id));
+        for (DetailPurchase detail : purchase.getDetails()) {
+            Product product = detail.getProduct();
+            int newStock = product.getActualStock() - detail.getQuantity();
+
+            if (newStock < 0) {
+            }
+            
+            product.setActualStock(newStock);
+        }
+        
+        purchaseRepository.delete(purchase);
+	}
 }
