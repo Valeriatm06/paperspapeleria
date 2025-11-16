@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -94,5 +95,29 @@ public class SaleServiceImpl implements SaleService {
         dto.setDetails(detailsDTO);
 
         return dto;
+    }
+
+    @Override
+    public List<SaleDTO> listSales() {
+        List<Sale> sales = saleRepository.findAll();
+        return sales.stream()
+                .map(this::convertSaleToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void deleteSale(Long id) {
+        Sale sale = saleRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Venta no encontrada con ID: " + id));
+
+        for (DetailSale detail : sale.getDetalles()) {
+            Product product = detail.getProduct();
+            
+            int newStock = product.getActualStock() + detail.getCantidad();
+            product.setActualStock(newStock);
+        }
+        
+        saleRepository.delete(sale);
     }
 }

@@ -15,7 +15,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -83,6 +84,19 @@ class SaleControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$.length()").value(2))
-        .andExpect(jsonPath("$[0].terceroId").value("C1"));
+        .andExpect(jsonPath("$[0].userId").value("C1"));
     }
+
+    @Test
+    void testDeleteSale() throws Exception {
+        Long idSaleToDelete = 99L;
+        mockMvc.perform(
+                delete("/api/ventas/{id}", idSaleToDelete)
+                    .contentType(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isNoContent());
+        
+        verify(saleService, times(1)).deleteSale(idSaleToDelete);
+    }
+
 }
