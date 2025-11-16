@@ -103,4 +103,12 @@ public class ProductServiceImpl implements ProductService {
         return convertToDetailDTO(upDatedProduct);
     }
 
+    @Override
+    public void deleteProduct(Long id) {
+        if (!productRepository.existsById(id)) {
+            throw new EntityNotFoundException("Producto no encontrado con ID: " + id + ". No se pudo eliminar.");
+        }
+        productRepository.deleteById(id);
+    }
+
 }

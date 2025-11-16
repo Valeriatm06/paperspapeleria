@@ -13,7 +13,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doNothing;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -103,5 +105,16 @@ class ProductControllerTest {
         .andExpect(jsonPath("$.name").value("Producto Editado"))
         .andExpect(jsonPath("$.reference").value("REF-EDITADO"))
         .andExpect(jsonPath("$.purchasePrice").value(9999.0));
+    }
+
+    @Test
+    void testDeleteProduct() throws Exception {
+        Long productoId = 1L;
+        doNothing().when(productoService).deleteProduct(productoId);
+        mockMvc.perform(
+                delete("/api/productos/1") 
+                    .contentType(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk());
     }
 }
