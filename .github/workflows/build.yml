@@ -1,0 +1,40 @@
+# .github/workflows/build.yml
+
+name: Build, Test, and Analyze (Java)
+
+on:
+  # Dispara la acción en CUALQUIER push a CUALQUIER rama
+  push:
+    branches:
+      - '**' # Esto significa 'todas las ramas'
+
+  # TAMBIÉN dispáralo al crear un Pull Request hacia 'main'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Clona tu código
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Necesario para SonarCloud
+
+      # 2. Configura JDK 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # 3. Construye, Prueba y Escanea (Todo en uno)
+      # Nota: El 'projectKey' y 'organization' se leen desde tu pom.xml
+      - name: Build, Test, and Scan
+        run: mvn -B verify org.jacoco:jacoco-maven-plugin:report sonar:sonar
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
