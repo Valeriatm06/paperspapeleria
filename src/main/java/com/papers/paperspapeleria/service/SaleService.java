@@ -11,4 +11,6 @@ public interface SaleService {
     List<SaleDTO> listSales();
 
     void deleteSale(Long id);
+
+    SaleDTO upDateSale(Long id, SaleDTO saleDTO);
 }

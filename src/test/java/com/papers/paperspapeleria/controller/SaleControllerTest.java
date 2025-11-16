@@ -14,8 +14,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -97,6 +99,28 @@ class SaleControllerTest {
         .andExpect(status().isNoContent());
         
         verify(saleService, times(1)).deleteSale(idSaleToDelete);
+    }
+
+    @Test
+    void testUpDateSale() throws Exception {
+        Long saleIdToUpDate = 10L;
+        SaleDTO upDatedSale = new SaleDTO();
+        upDatedSale.setId(saleIdToUpDate);
+        upDatedSale.setUserId("NUEVO_CLIENTE");
+        upDatedSale.setTotalValue(10000.0);
+        upDatedSale.setTaxes(1600.0);
+        upDatedSale.setDetails(null);
+
+        when(saleService.upDateSale(eq(saleIdToUpDate), any(SaleDTO.class)))
+                .thenReturn(upDatedSale);
+
+        mockMvc.perform(
+                put("/api/ventas/{id}", saleIdToUpDate)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(upDatedSale))
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.totalValue").value(10000.0));
     }
 
 }

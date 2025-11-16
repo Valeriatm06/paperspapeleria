@@ -120,4 +120,32 @@ public class SaleServiceImpl implements SaleService {
         
         saleRepository.delete(sale);
     }
+
+    @Override
+    @Transactional
+    public SaleDTO upDateSale(Long id, SaleDTO saleDTO) {
+        Sale actualSale = saleRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Venta no encontrada con ID: " + id));
+        if (saleDTO.getUserId() != null &&
+            !saleDTO.getUserId().equals(actualSale.getClient().getIdentification())) {
+            
+            User newClient = userRepository.findById(saleDTO.getUserId())
+                    .orElseThrow(() -> new EntityNotFoundException("Cliente (Tercero) no encontrado con ID: " + saleDTO.getUserId()));
+            
+            actualSale.setClient(newClient);
+        }
+
+        if (saleDTO.getTotalValue() != null) {
+            actualSale.setTotalValue(saleDTO.getTotalValue());
+        }
+        if (saleDTO.getTaxes() != null) {
+            actualSale.setTaxes(saleDTO.getTaxes());
+        }
+        if (saleDTO.getDiscounts() != null) {
+            actualSale.setDiscounts(saleDTO.getDiscounts());
+        }
+
+        Sale savedSale = saleRepository.save(actualSale);
+        return convertSaleToDTO(savedSale);
+    }
 }

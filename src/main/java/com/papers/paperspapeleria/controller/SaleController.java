@@ -38,4 +38,10 @@ public class SaleController {
     public void eliminarVenta(@PathVariable Long id) {
         saleService.deleteSale(id);
     }
+
+    @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public SaleDTO upDateSale(@PathVariable Long id, @RequestBody SaleDTO saleDTO) {
+        return saleService.upDateSale(id, saleDTO);
+    }
 }
