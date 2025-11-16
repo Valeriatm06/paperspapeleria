@@ -1,0 +1,63 @@
+package com.papers.paperspapeleria.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.papers.paperspapeleria.dto.UserDTO;
+import com.papers.paperspapeleria.service.UserService;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Set;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+
+@WebMvcTest(UserController.class)
+class UserControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockBean
+    private UserService terceroService;
+
+    @Test
+    void testCreateUser() throws Exception {
+        UserDTO userToSend = new UserDTO();
+        userToSend.setIdentificacion("12345678");
+        userToSend.setNombres("Juan");
+        userToSend.setApellidos("Gomez");
+        userToSend.setEmail("juan@correo.com");
+        userToSend.setRoles(Set.of("CLIENTE"));
+
+        UserDTO userSaved = new UserDTO();
+        userSaved.setIdentificacion("12345678");
+        userSaved.setNombres("Juan");
+        userSaved.setApellidos("Gomez");
+        userSaved.setEmail("juan@correo.com");
+        userSaved.setRoles(Set.of("CLIENTE"));
+        userSaved.setActive(true);
+        when(terceroService.createUser(any(UserDTO.class)))
+                .thenReturn(userSaved);
+
+        mockMvc.perform(
+                post("/api/usuarios")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(userToSend))
+        )
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.identificacion").value("12345678"))
+        .andExpect(jsonPath("$.nombres").value("Juan"))
+        .andExpect(jsonPath("$.active").value(true))
+        .andExpect(jsonPath("$.roles[0]").value("CLIENTE"));
+    }
+}
