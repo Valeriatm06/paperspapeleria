@@ -83,4 +83,24 @@ public class ProductServiceImpl implements ProductService {
         return p;
     }
 
+    @Override
+    public ProductDetailDTO upDateProduct(Long id, ProductDetailDTO productDTO) {
+        Product productoExistente = productRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado con ID: " + id));
+
+        productoExistente.setReference(productDTO.getReference());
+        productoExistente.setName(productDTO.getName());
+        productoExistente.setPurchasePrice(productDTO.getPurchasePrice());
+        productoExistente.setSalePrice(productDTO.getSalePrice());
+        productoExistente.setActualStock(productDTO.getActualStock());
+        productoExistente.setDescription(productDTO.getDescription());
+        productoExistente.setBrand(productDTO.getBrand());
+        productoExistente.setCategory(productDTO.getCategory());
+        productoExistente.setImage(productDTO.getImage());
+
+        Product upDatedProduct = productRepository.save(productoExistente);
+
+        return convertToDetailDTO(upDatedProduct);
+    }
+
 }

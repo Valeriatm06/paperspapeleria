@@ -11,4 +11,6 @@ public interface ProductService {
     ProductDetailDTO getProductById(Long id);
 
     ProductDetailDTO createProduct(ProductDetailDTO producto);
+
+    ProductDetailDTO upDateProduct(Long id, ProductDetailDTO producto);
 }

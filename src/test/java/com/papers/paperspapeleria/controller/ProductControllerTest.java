@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -82,5 +83,25 @@ class ProductControllerTest {
         .andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.name").value("Producto Nuevo"))
         .andExpect(jsonPath("$.reference").value("REF-NUEVO"));
+    }
+
+    @Test
+    void testUpDateProducts() throws Exception {
+        ProductDetailDTO upDatedProduct = new ProductDetailDTO();
+        upDatedProduct.setName("Producto Editado");
+        upDatedProduct.setReference("REF-EDITADO");
+        upDatedProduct.setPurchasePrice(9999.0);
+
+        when(productoService.upDateProduct(any(Long.class), any(ProductDetailDTO.class)))
+                .thenReturn(upDatedProduct);
+        mockMvc.perform(
+                put("/api/productos/1") 
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(upDatedProduct))
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.name").value("Producto Editado"))
+        .andExpect(jsonPath("$.reference").value("REF-EDITADO"))
+        .andExpect(jsonPath("$.purchasePrice").value(9999.0));
     }
 }
