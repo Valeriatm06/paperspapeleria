@@ -158,4 +158,12 @@ public class UserServiceImpl implements UserService {
         return convertTOEntityDTO(upDatedUser);
     }
 
+    @Override
+    public void deleteUser(String id) {
+        if (!userRepository.existsById(id)) {
+            throw new EntityNotFoundException("Tercero no encontrado con ID: " + id + ". No se pudo eliminar.");
+        }
+        userRepository.deleteById(id);
+    }
+
 }

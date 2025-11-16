@@ -15,12 +15,14 @@ import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doNothing;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 
 @WebMvcTest(UserController.class)
 class UserControllerTest {
@@ -125,5 +127,17 @@ class UserControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.nombres").value("Nombre Editado"))
         .andExpect(jsonPath("$.email").value("editado@correo.com"));
+    }
+
+    @Test
+    void testDeleteUser() throws Exception {
+        String userId = "12345";
+        doNothing().when(userService).deleteUser(userId);
+
+        mockMvc.perform(
+                delete("/api/usuarios/" + userId)
+                    .contentType(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk());
     }
 }
