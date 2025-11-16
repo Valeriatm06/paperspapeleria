@@ -7,10 +7,11 @@ public class ProductDetailDTO {
     private Long id;
     private String name;
     private String reference;
-    private Double purchasePrice; // Usamos Double para dinero
+    private Double purchasePrice;
     private Double salePrice;
-    private Integer actualStock; // Usamos Integer para stock
+    private Integer actualStock;
     private String description;
     private String brand;
     private String category;
+    private String image;
 }
