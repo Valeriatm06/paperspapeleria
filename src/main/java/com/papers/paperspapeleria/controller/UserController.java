@@ -28,4 +28,9 @@ public class UserController {
     public List<UserDTO> listarUsers() {
         return userService.listUsers();
     }
+
+    @GetMapping("/{id}") 
+    public UserDTO getUserById(@PathVariable String id) {
+        return userService.getUserById(id);
+    }
 }

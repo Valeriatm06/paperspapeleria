@@ -85,4 +85,24 @@ class UserControllerTest {
         .andExpect(jsonPath("$[0].identificacion").value("111"))
         .andExpect(jsonPath("$[0].nombres").value("Usuario Uno"));
     }
+
+    @Test
+    void testGetUserById() throws Exception {
+        String userId = "12345";
+        
+        UserDTO userMock = new UserDTO();
+        userMock.setIdentificacion(userId);
+        userMock.setNombres("Usuario de Prueba");
+        userMock.setEmail("prueba@correo.com");
+
+        when(userService.getUserById(userId))
+                .thenReturn(userMock);
+        mockMvc.perform(
+                get("/api/usuarios/" + userId) 
+                    .contentType(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.identificacion").value(userId))
+        .andExpect(jsonPath("$.nombres").value("Usuario de Prueba"));
+    }
 }

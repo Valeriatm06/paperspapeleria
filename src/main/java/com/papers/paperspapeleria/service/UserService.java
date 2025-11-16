@@ -9,4 +9,6 @@ public interface UserService {
     UserDTO createUser(UserDTO userDTO);
 
     List<UserDTO> listUsers();
+
+    UserDTO getUserById(String id);
 }
