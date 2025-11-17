@@ -3,11 +3,15 @@ package com.papers.paperspapeleria.service;
 import com.papers.paperspapeleria.dto.ExpensesPerCategoryDTO;
 import com.papers.paperspapeleria.dto.PurchaseInvoiceDetailDTO;
 import com.papers.paperspapeleria.dto.PurchaseReportDTO;
+import com.papers.paperspapeleria.dto.SaleInvoiceDetailDTO;
+import com.papers.paperspapeleria.dto.SaleReportDTO;
 import com.papers.paperspapeleria.dto.UserDTO;
 import com.papers.paperspapeleria.entity.User;
 import com.papers.paperspapeleria.mapper.UserMapper;
 import com.papers.paperspapeleria.repository.DetailPurchaseRepository;
+import com.papers.paperspapeleria.repository.DetailSaleRepository;
 import com.papers.paperspapeleria.repository.PurchaseRepository;
+import com.papers.paperspapeleria.repository.SaleRepository;
 import com.papers.paperspapeleria.repository.UserRepository; // 👈 2. Importar el Repo
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +25,11 @@ public class ReportServiceImpl implements ReportService {
     
     @Autowired
     private UserRepository userRepository; // 👈 3. Inyectar
+
+    @Autowired
+    private SaleRepository saleRepository;
+    @Autowired
+    private DetailSaleRepository detailSaleRepository;
 
 @Autowired
     private PurchaseRepository purchaseRepository;
@@ -106,6 +115,26 @@ public class ReportServiceImpl implements ReportService {
     public List<PurchaseInvoiceDetailDTO> getReporteFacturasCompra() {
         System.out.println("--- DEBUG: Ejecutando getReporteFacturasCompra() ---");
         List<PurchaseInvoiceDetailDTO> resultados = detailPurchaseRepository.findFacturasCompraReport();
+        System.out.println("Resultados encontrados: " + resultados.size());
+        System.out.println("---------------------------------------------------");
+        return resultados;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SaleReportDTO> getReporteSales() {
+        System.out.println("--- DEBUG: Ejecutando getReporteSales() ---");
+        List<SaleReportDTO> resultados = saleRepository.findAllSalesReport();
+        System.out.println("Resultados encontrados: " + resultados.size());
+        System.out.println("---------------------------------------------------");
+        return resultados;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SaleInvoiceDetailDTO> getReporteFacturasVenta() {
+        System.out.println("--- DEBUG: Ejecutando getReporteFacturasVenta() ---");
+        List<SaleInvoiceDetailDTO> resultados = detailSaleRepository.findFacturasVentaReport();
         System.out.println("Resultados encontrados: " + resultados.size());
         System.out.println("---------------------------------------------------");
         return resultados;
