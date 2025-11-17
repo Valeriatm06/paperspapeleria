@@ -19,3 +19,7 @@ spring:
       
     # "true" -> Muestra en la consola el SQL que Hibernate está ejecutando
     show-sql: true
+
+jwt:
+  # Una clave HS512 (generada en Base64) se ve así:
+  secret: bXlBcHBEb2VzTm90SGF2ZUFueVNlY3JldEtleVRvSGFuZGxlVGhpcyBUaGluZyBCZXR0ZXIgVGhhbiBUaGlzIQ==
