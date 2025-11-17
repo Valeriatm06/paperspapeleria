@@ -17,7 +17,7 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private RolRepository rolRepository; // 👈 Ya no usamos UserRoleRepository
+    private RolRepository rolRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -26,6 +26,7 @@ public class DataInitializer implements CommandLineRunner {
         
         // 1. Crear el ROL_ADMIN (si no existe)
         Rol adminRole;
+        // (Tu código original usa "ADMINISTRADOR", lo cual está perfecto)
         Optional<Rol> existingRole = rolRepository.findByName("ADMINISTRADOR");
         
         if (existingRole.isEmpty()) {
@@ -38,27 +39,64 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         // 2. Crear el Usuario ADMIN (si no existe)
-        String adminUsername = "admin"; // Esta es la 'identification'
+        String adminUsername = "admin";
         
         if (userRepository.findByIdentification(adminUsername).isEmpty()) {
             User adminUser = new User();
-            // ⚠️ USA LOS NOMBRES DE TUS CAMPOS JAVA
             adminUser.setIdentification(adminUsername); 
             adminUser.setActive(true);
             adminUser.setNames("Administrador");
             adminUser.setLastNames("Principal");
             adminUser.setEmail("admin@papers.com");
-            adminUser.setIdType("CC"); // 'idType' en lugar de 'tipoIdentificacion'
+            adminUser.setIdType("CC");
             
-            // 3. Encriptar la contraseña "admin123"
-            adminUser.setPassword(passwordEncoder.encode("admin123")); // 'password' en lugar de 'passwordHash'
+            // (Tu código original para la contraseña del admin)
+            adminUser.setPassword(passwordEncoder.encode("admin123")); 
 
-            // 4. Asignar el rol (JPA maneja la tabla users_roles)
-            adminUser.getRols().add(adminRole); // 👈 Asignación directa
+            adminUser.getRols().add(adminRole);
             
             userRepository.save(adminUser);
             
             System.out.println(">>> Usuario 'admin' con contraseña 'admin123' creado <<<");
         }
+
+        // --- 👈 INICIO DEL NUEVO BLOQUE ---
+        // 3. Crear ROL_CLIENTE (si no existe)
+        Rol clientRole;
+        Optional<Rol> existingClientRole = rolRepository.findByName("CLIENTE"); 
+        
+        if (existingClientRole.isEmpty()) {
+            clientRole = new Rol();
+            clientRole.setId(2L); // 👈 Asumimos ID 2
+            clientRole.setName("CLIENTE"); 
+            clientRole = rolRepository.save(clientRole);
+        } else {
+            clientRole = existingClientRole.get();
+        }
+
+        // 4. Crear un Cliente de prueba (si no existe)
+        String clientUsername = "cliente123";
+        
+        if (userRepository.findByIdentification(clientUsername).isEmpty()) {
+            User clientUser = new User();
+            clientUser.setIdentification(clientUsername);
+            clientUser.setActive(true);
+            clientUser.setNames("Cliente");
+            clientUser.setLastNames("De Prueba");
+            clientUser.setEmail("cliente@papers.com");
+            clientUser.setIdType("CC");
+            
+            // 5. 👈 ESTA ES LA CLAVE:
+            // Los clientes no tienen contraseña
+            clientUser.setPassword(null); 
+
+            // 6. Asignar el rol "CLIENTE"
+            clientUser.getRols().add(clientRole);
+            
+            userRepository.save(clientUser);
+            System.out.println(">>> Usuario 'cliente123' (CLIENTE) creado <<<");
+        }
+        // --- 👈 FIN DEL NUEVO BLOQUE ---
+        
     }
 }
