@@ -1,6 +1,7 @@
 package com.papers.paperspapeleria.controller;
 
 import com.papers.paperspapeleria.dto.ExpensesPerCategoryDTO;
+import com.papers.paperspapeleria.dto.PurchaseReportDTO;
 import com.papers.paperspapeleria.dto.UserDTO;
 import com.papers.paperspapeleria.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,5 +39,11 @@ public class ReportController {
     public ResponseEntity<List<ExpensesPerCategoryDTO>> getGastosPorCategoria() {
         List<ExpensesPerCategoryDTO> gastos = reportService.getExpensesPerCategory();
         return ResponseEntity.ok(gastos);
+    }
+
+    @GetMapping("/reporte-compras") // 👈 Nuevo endpoint
+    public ResponseEntity<List<PurchaseReportDTO>> getReporteCompras() {
+        List<PurchaseReportDTO> purchases = reportService.getPurchaseReport();
+        return ResponseEntity.ok(purchases);
     }
 }

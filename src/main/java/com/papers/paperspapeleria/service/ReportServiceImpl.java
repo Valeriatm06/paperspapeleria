@@ -1,10 +1,12 @@
 package com.papers.paperspapeleria.service;
 
 import com.papers.paperspapeleria.dto.ExpensesPerCategoryDTO;
+import com.papers.paperspapeleria.dto.PurchaseReportDTO;
 import com.papers.paperspapeleria.dto.UserDTO;
 import com.papers.paperspapeleria.entity.User;
 import com.papers.paperspapeleria.mapper.UserMapper;
 import com.papers.paperspapeleria.repository.DetailPurchaseRepository;
+import com.papers.paperspapeleria.repository.PurchaseRepository;
 import com.papers.paperspapeleria.repository.UserRepository; // 👈 2. Importar el Repo
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,9 @@ public class ReportServiceImpl implements ReportService {
     
     @Autowired
     private UserRepository userRepository; // 👈 3. Inyectar
+
+@Autowired
+    private PurchaseRepository purchaseRepository;
 
     @Autowired
     private DetailPurchaseRepository detailPurchaseRepository;
@@ -68,6 +73,30 @@ public class ReportServiceImpl implements ReportService {
         System.out.println("---------------------------------------------------");
 
         // 3. Devolvemos el resultado al controlador (como antes)
+        return resultados;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PurchaseReportDTO> getPurchaseReport() {
+        System.out.println("--- DEBUG: Ejecutando getReporteCompras() ---");
+        
+        // 👈 CAMBIO: Llamamos al método corregido
+        List<PurchaseReportDTO> resultados = purchaseRepository.findAllPurchasesReport(); 
+        
+        System.out.println("--- DEBUG: Resultado de getReporteCompras() ---");
+        if (resultados == null || resultados.isEmpty()) {
+            System.out.println("La consulta de Reporte de Compras NO devolvió filas.");
+        } else {
+            for (PurchaseReportDTO dto : resultados) {
+                // 👈 CAMBIO: Usamos los nombres del DTO corregido
+                System.out.println("Compra ID: " + dto.getId() + 
+                                   ", Fecha: " + dto.getDate() + 
+                                   ", Total: " + dto.getTotalValue() + 
+                                   ", Proveedor: " + dto.getSupplierName());
+            }
+        }
+        System.out.println("---------------------------------------------------");
         return resultados;
     }
 }
