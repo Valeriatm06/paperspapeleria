@@ -8,9 +8,13 @@ public interface SaleService {
 
     SaleDTO createSale(SaleDTO saleDTO);
 
-    List<SaleDTO> listSales();
+    List<SaleDTO> getAllSales();
 
     void deleteSale(Long id);
 
     SaleDTO upDateSale(Long id, SaleDTO saleDTO);
+
+
+
+
 }

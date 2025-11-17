@@ -77,7 +77,7 @@ class SaleControllerTest {
 
         List<SaleDTO> listMock = List.of(sale1, sale2);
 
-        when(saleService.listSales()).thenReturn(listMock);
+        when(saleService.getAllSales()).thenReturn(listMock);
 
         mockMvc.perform(
                 get("/api/ventas")

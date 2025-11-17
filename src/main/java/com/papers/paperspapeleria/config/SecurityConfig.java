@@ -5,6 +5,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 // 1. ⚠️ ¡IMPORTANTE! Asegúrate de tener este import
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -55,6 +56,10 @@ public class SecurityConfig {
                 .requestMatchers("/api/compras").permitAll() // Permitir guardar la compra sin autenticación (TEMPORALMENTE)
                 .requestMatchers("/api/productos").permitAll() // Permitir cargar productos para el formulario
                 .requestMatchers("/api/usuarios/rol/PROVEEDOR").permitAll() // Permitir cargar proveedores
+                .requestMatchers(HttpMethod.POST, "/api/ventas").permitAll() 
+                .requestMatchers(HttpMethod.GET, "/api/ventas").permitAll() 
+                .requestMatchers(HttpMethod.PUT, "/api/ventas/**").permitAll() 
+                .requestMatchers(HttpMethod.DELETE, "/api/ventas/**").permitAll()
                 .anyRequest().authenticated() 
             )
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
