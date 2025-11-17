@@ -1,5 +1,6 @@
 package com.papers.paperspapeleria.service;
 
+import com.papers.paperspapeleria.dto.ExpensesPerCategoryDTO;
 import com.papers.paperspapeleria.dto.SaleDTO;
 import com.papers.paperspapeleria.dto.UserDTO;
 
@@ -10,4 +11,6 @@ public interface ReportService {
     List<UserDTO> getListClients();
 
     List<UserDTO> getListSupplier();
+
+    List<ExpensesPerCategoryDTO> getExpensesPerCategory();
 }

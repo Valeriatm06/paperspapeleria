@@ -1,6 +1,7 @@
 package com.papers.paperspapeleria.controller;
 
 import com.papers.paperspapeleria.config.SecurityConfig;
+import com.papers.paperspapeleria.dto.ExpensesPerCategoryDTO;
 import com.papers.paperspapeleria.dto.UserDTO; // Asumimos que tienes un UserDTO
 import com.papers.paperspapeleria.security.JwtAuthFilter;
 import com.papers.paperspapeleria.security.UserDetailsServiceImpl;
@@ -85,5 +86,28 @@ public class ReportControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(1))
         .andExpect(jsonPath("$[0].nombres").value("Proveedor Prueba"));
+    }
+
+    @Test
+    @WithMockUser // Simula logueado
+    void testGetGastosPorCategoria() throws Exception {
+        // 1. Arrange
+        ExpensesPerCategoryDTO gasto1 = new ExpensesPerCategoryDTO("Papelería", 50000.0);
+        ExpensesPerCategoryDTO gasto2 = new ExpensesPerCategoryDTO("Oficina", 120000.0);
+
+        List<ExpensesPerCategoryDTO> mockResponse = List.of(gasto1, gasto2);
+
+        // 2. Simular el nuevo método del servicio
+        when(reportService.getExpensesPerCategory()).thenReturn(mockResponse); // 👈 Fallará (no existe)
+
+        // 3. Act & Assert
+        mockMvc.perform(
+                get("/api/reportes/gastos-por-categoria") // 👈 Endpoint nuevo
+                        .contentType(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(2))
+        .andExpect(jsonPath("$[0].category").value("Papelería"))
+        .andExpect(jsonPath("$[0].totalSpend").value(50000.0));
     }
 }
