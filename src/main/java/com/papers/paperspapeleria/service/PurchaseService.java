@@ -3,6 +3,7 @@ package com.papers.paperspapeleria.service;
 import java.util.List;
 
 import com.papers.paperspapeleria.dto.PurchaseDTO;
+import com.papers.paperspapeleria.dto.SavePurchaseRequest;
 
 public interface PurchaseService {
     
@@ -15,4 +16,6 @@ public interface PurchaseService {
     PurchaseDTO updatePurchase(Long id, PurchaseDTO purchaseDTO);
     
     void deletePurchase(Long id);
+
+    PurchaseDTO savePurchase(SavePurchaseRequest request);
 }

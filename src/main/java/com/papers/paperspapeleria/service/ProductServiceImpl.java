@@ -4,9 +4,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import jakarta.persistence.EntityNotFoundException;
 import com.papers.paperspapeleria.dto.ProductDTO;
-import com.papers.paperspapeleria.entity.Product; 
+import com.papers.paperspapeleria.entity.Product;
+import com.papers.paperspapeleria.mapper.ProductMapper;
 import com.papers.paperspapeleria.repository.ProductRepository; 
 import org.springframework.beans.factory.annotation.Autowired;
 import com.papers.paperspapeleria.dto.ProductDetailDTO;
@@ -15,6 +18,10 @@ import com.papers.paperspapeleria.dto.ProductDetailDTO;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
+
+    
+    @Autowired
+    private ProductMapper productMapper;
 
     @Autowired
     public ProductServiceImpl(ProductRepository productRepository) {
@@ -109,6 +116,15 @@ public class ProductServiceImpl implements ProductService {
             throw new EntityNotFoundException("Producto no encontrado con ID: " + id + ". No se pudo eliminar.");
         }
         productRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProductDetailDTO> getAllProducts() { // 👈 Retorna ProductDetailDTO
+        List<Product> products = productRepository.findAll();
+        return products.stream()
+                .map(productMapper::toDetailDTO) // 👈 Usa un método de mapeo que cree ProductDetailDTO
+                .collect(Collectors.toList());
     }
 
 }

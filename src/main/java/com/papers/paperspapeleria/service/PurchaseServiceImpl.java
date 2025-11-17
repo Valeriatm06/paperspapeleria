@@ -2,6 +2,7 @@ package com.papers.paperspapeleria.service;
 
 import com.papers.paperspapeleria.dto.DetailPurchaseDTO;
 import com.papers.paperspapeleria.dto.PurchaseDTO;
+import com.papers.paperspapeleria.dto.SavePurchaseRequest;
 import com.papers.paperspapeleria.entity.User; // Importa tu entidad User
 import com.papers.paperspapeleria.entity.DetailPurchase; // Importa tu entidad DetailPurchase
 import com.papers.paperspapeleria.entity.Product; // Importa tu entidad Product
@@ -162,4 +163,74 @@ public class PurchaseServiceImpl implements PurchaseService {
         
         purchaseRepository.delete(purchase);
 	}
+
+    @Override
+    @Transactional // Garantiza que todo se guarda o nada se guarda (incluyendo el stock)
+    public PurchaseDTO savePurchase(SavePurchaseRequest request) {
+        
+        // --- 1. Buscar el Proveedor ---
+        User supplier = userRepository.findByIdentification(request.getSupplierId())
+            .orElseThrow(() -> new RuntimeException("Proveedor no encontrado con ID: " + request.getSupplierId()));
+
+        // --- 2. Mapear Purchase DTO a Entity ---
+        Purchase purchase = new Purchase();
+        purchase.setSupplier(supplier);
+
+        // Convertir la fecha ISO String (ej. "2025-11-17T05:00:00.000Z" o "2025-11-17")
+        // Como el frontend solo envía la fecha "YYYY-MM-DD", necesitamos ajustarlo a LocalDateTime.
+        // Asumiremos las 00:00:00 del día
+        LocalDateTime date = LocalDateTime.parse(request.getDate() + "T00:00:00");
+        purchase.setDate(date);
+        
+        purchase.setTaxes(request.getTaxes());
+        purchase.setDiscounts(request.getDiscounts());
+        purchase.setTotalValue(request.getTotalValue());
+
+        List<DetailPurchase> details = new ArrayList<>();
+        
+        // --- 3. Procesar Detalles, Actualizar Stock y Mapear Detalles ---
+        for (DetailPurchaseDTO detailDto : request.getDetails()) {
+            
+            Product product = productRepository.findById(detailDto.getProductId())
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + detailDto.getProductId()));
+            
+            // 💡 LÓGICA DE STOCK: Guardar Stock Inicial y AUMENTAR Stock Actual
+            Integer initialStock = product.getActualStock();
+            
+            // Crear la entidad DetailPurchase
+            DetailPurchase detail = new DetailPurchase();
+            detail.setPurchase(purchase);
+            detail.setProduct(product);
+            detail.setQuantity(detailDto.getQuantity());
+            detail.setUnitPrice(detailDto.getUnitPrice());
+            detail.setSubtotal(detailDto.getSubtotal());
+            
+            // Guardar el stock antes de la compra en el detalle
+            detail.setInitialStock(initialStock); 
+            
+            // ⚠️ AUMENTAR EL STOCK: Sumar la cantidad comprada al stock actual
+            product.setActualStock(initialStock + detail.getQuantity());
+            
+            // productRepository.save(product) no es estrictamente necesario aquí
+            // si la Product entity tiene cascade/es manejada por el EntityManager,
+            // pero la persistencia transaccional de Spring se encargará al finalizar.
+            
+            details.add(detail);
+        }
+        
+        // Enlazar los detalles a la compra principal
+        purchase.setDetails(details); 
+
+        // --- 4. Guardar la Compra (los detalles se guardan en cascada) ---
+        Purchase savedPurchase = purchaseRepository.save(purchase);
+        
+        // --- 5. Retornar el DTO de Respuesta ---
+        PurchaseDTO responseDTO = new PurchaseDTO();
+        responseDTO.setId(savedPurchase.getId());
+        responseDTO.setDate(savedPurchase.getDate());
+        responseDTO.setTotalValue(savedPurchase.getTotalValue());
+        // Agrega más campos si es necesario
+        
+        return responseDTO;
+    }
 }

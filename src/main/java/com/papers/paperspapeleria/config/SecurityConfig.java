@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import com.papers.paperspapeleria.security.JwtAuthFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 
 @Configuration
 @EnableWebSecurity
@@ -51,6 +52,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll() 
+                .requestMatchers("/api/compras").permitAll() // Permitir guardar la compra sin autenticación (TEMPORALMENTE)
+                .requestMatchers("/api/productos").permitAll() // Permitir cargar productos para el formulario
+                .requestMatchers("/api/usuarios/rol/PROVEEDOR").permitAll() // Permitir cargar proveedores
                 .anyRequest().authenticated() 
             )
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

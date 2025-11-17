@@ -1,10 +1,14 @@
 package com.papers.paperspapeleria.controller;
 
 import com.papers.paperspapeleria.dto.PurchaseDTO;
+import com.papers.paperspapeleria.dto.SavePurchaseRequest;
 import com.papers.paperspapeleria.service.PurchaseService;
+
+import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,11 +24,11 @@ public class PurchaseController {
         this.purchaseService = purchaseService;
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public PurchaseDTO createPurchase(@RequestBody PurchaseDTO purchaseDTO) {
-        return purchaseService.createPurchase(purchaseDTO);
-    }
+    //@PostMapping
+    //@ResponseStatus(HttpStatus.CREATED)
+    //public PurchaseDTO createPurchase(@RequestBody PurchaseDTO purchaseDTO) {
+      //  return purchaseService.createPurchase(purchaseDTO);
+    //}
     
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
@@ -48,5 +52,16 @@ public class PurchaseController {
     @ResponseStatus(HttpStatus.OK)
     public PurchaseDTO updatePurchase(@PathVariable Long id, @RequestBody PurchaseDTO purchaseDTO) {
         return purchaseService.updatePurchase(id, purchaseDTO);
+    }
+
+    @PostMapping
+    public ResponseEntity<PurchaseDTO> savePurchase(@Valid @RequestBody SavePurchaseRequest request) {
+        try {
+            PurchaseDTO savedPurchase = purchaseService.savePurchase(request);
+            return new ResponseEntity<>(savedPurchase, HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            System.err.println("Error al guardar compra: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 }

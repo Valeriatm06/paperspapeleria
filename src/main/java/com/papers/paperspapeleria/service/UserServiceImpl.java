@@ -12,12 +12,14 @@ import org.springframework.stereotype.Service;
 import com.papers.paperspapeleria.dto.UserDTO;
 import com.papers.paperspapeleria.entity.Rol;
 import com.papers.paperspapeleria.entity.User;
+import com.papers.paperspapeleria.mapper.UserMapper;
 import com.papers.paperspapeleria.repository.RolRepository;
 import com.papers.paperspapeleria.repository.UserRepository;
 
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -30,6 +32,9 @@ public class UserServiceImpl implements UserService {
         this.userRepository = userRepository;
         this.rolRepository = rolRepository;
     }
+
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     @Transactional
@@ -164,6 +169,15 @@ public class UserServiceImpl implements UserService {
             throw new EntityNotFoundException("Tercero no encontrado con ID: " + id + ". No se pudo eliminar.");
         }
         userRepository.deleteById(id);
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public List<UserDTO> findUsersByRole(String roleName) {
+        List<User> users = userRepository.findByRols_Name(roleName); 
+        return users.stream()
+                .map(userMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
 }

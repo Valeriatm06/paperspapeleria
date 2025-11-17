@@ -27,10 +27,10 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @GetMapping
-    public List<ProductDTO> listProducts() {
-        return productService.listProducts();
-    }
+    //@GetMapping
+    //public List<ProductDTO> listProducts() {
+      //  return productService.listProducts();
+    //}
 
     @GetMapping("/{id}")
     public ProductDetailDTO getProductoById(@PathVariable Long id) {
@@ -59,5 +59,11 @@ public class ProductController {
             @PathVariable Long id
     ) {
         productService.deleteProduct(id);
+    }
+
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<ProductDetailDTO> getAllProducts() { // 👈 ¡Ahora devuelve ProductDetailDTO!
+        return productService.getAllProducts();
     }
 }

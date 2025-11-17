@@ -6,6 +6,7 @@ import com.papers.paperspapeleria.dto.UserDTO;
 import com.papers.paperspapeleria.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -46,5 +47,14 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public void eliminarUser(@PathVariable String id) {
         userService.deleteUser(id);
+    }
+
+    @GetMapping("/rol/{roleName}")
+    public ResponseEntity<List<UserDTO>> getUsersByRole(@PathVariable String roleName) {
+        List<UserDTO> users = userService.findUsersByRole(roleName); // Necesitarás crear este método en el servicio
+        if (users.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(users);
     }
 }
