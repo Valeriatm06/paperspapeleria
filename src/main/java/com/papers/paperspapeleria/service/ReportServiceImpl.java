@@ -1,6 +1,7 @@
 package com.papers.paperspapeleria.service;
 
 import com.papers.paperspapeleria.dto.ExpensesPerCategoryDTO;
+import com.papers.paperspapeleria.dto.PurchaseInvoiceDetailDTO;
 import com.papers.paperspapeleria.dto.PurchaseReportDTO;
 import com.papers.paperspapeleria.dto.UserDTO;
 import com.papers.paperspapeleria.entity.User;
@@ -99,4 +100,16 @@ public class ReportServiceImpl implements ReportService {
         System.out.println("---------------------------------------------------");
         return resultados;
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PurchaseInvoiceDetailDTO> getReporteFacturasCompra() {
+        System.out.println("--- DEBUG: Ejecutando getReporteFacturasCompra() ---");
+        List<PurchaseInvoiceDetailDTO> resultados = detailPurchaseRepository.findFacturasCompraReport();
+        System.out.println("Resultados encontrados: " + resultados.size());
+        System.out.println("---------------------------------------------------");
+        return resultados;
+    }
+
+
 }

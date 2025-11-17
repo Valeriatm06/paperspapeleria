@@ -1,6 +1,7 @@
 package com.papers.paperspapeleria.controller;
 
 import com.papers.paperspapeleria.dto.ExpensesPerCategoryDTO;
+import com.papers.paperspapeleria.dto.PurchaseInvoiceDetailDTO;
 import com.papers.paperspapeleria.dto.PurchaseReportDTO;
 import com.papers.paperspapeleria.dto.UserDTO;
 import com.papers.paperspapeleria.service.ReportService;
@@ -45,5 +46,11 @@ public class ReportController {
     public ResponseEntity<List<PurchaseReportDTO>> getReporteCompras() {
         List<PurchaseReportDTO> purchases = reportService.getPurchaseReport();
         return ResponseEntity.ok(purchases);
+    }
+
+    @GetMapping("/facturas-compra")
+    public ResponseEntity<List<PurchaseInvoiceDetailDTO>> getReporteFacturasCompra() {
+        List<PurchaseInvoiceDetailDTO> facturas = reportService.getReporteFacturasCompra();
+        return ResponseEntity.ok(facturas);
     }
 }
