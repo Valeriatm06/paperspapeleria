@@ -20,37 +20,20 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import java.util.Set;
 import java.util.stream.Collectors;
+import com.papers.paperspapeleria.security.JwtAuthFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     @Autowired
-    private UserRepository userRepository;
+    private JwtAuthFilter jwtAuthFilter;
 
     // Bean del Codificador
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    // Bean del UserDetailsService
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return username -> {
-            com.papers.paperspapeleria.entity.User user = userRepository.findByIdentification(username)
-                    .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado: " + username));
-            
-            Set<GrantedAuthority> authorities = user.getRols().stream()
-                    .map(rol -> new SimpleGrantedAuthority(rol.getName()))
-                    .collect(Collectors.toSet());
-            
-            return new org.springframework.security.core.userdetails.User(
-                user.getIdentification(),
-                user.getPassword(),
-                authorities
-            );
-        };
     }
 
     // 2. ⚠️ ESTE ES EL BEAN QUE CAUSÓ EL ERROR
@@ -71,6 +54,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated() 
             )
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
