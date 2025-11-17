@@ -30,4 +30,16 @@ public class ReportServiceImpl implements ReportService {
                 .map(userMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserDTO> getListSupplier() {
+        // 1. ⚠️ Lógica Real:
+        List<User> proveedores = userRepository.findByRols_Name("PROVEEDOR"); 
+        
+        // 2. Convertir
+        return proveedores.stream()
+                .map(userMapper::toDTO)
+                .collect(Collectors.toList());
+    }
 }

@@ -26,4 +26,10 @@ public class ReportController {
         List<UserDTO> clientes = reportService.getListClients();
         return ResponseEntity.ok(clientes);
     }
+
+    @GetMapping("/listado-proveedores") // 👈 AÑADIR ENDPOINT
+    public ResponseEntity<List<UserDTO>> getListadoProveedores() {
+        List<UserDTO> proveedores = reportService.getListSupplier();
+        return ResponseEntity.ok(proveedores);
+    }
 }

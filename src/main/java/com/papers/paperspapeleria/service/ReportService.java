@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface ReportService {
     List<UserDTO> getListClients();
+
+    List<UserDTO> getListSupplier();
 }

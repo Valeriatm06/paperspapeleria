@@ -96,7 +96,31 @@ public class DataInitializer implements CommandLineRunner {
             userRepository.save(clientUser);
             System.out.println(">>> Usuario 'cliente123' (CLIENTE) creado <<<");
         }
-        // --- 👈 FIN DEL NUEVO BLOQUE ---
         
+        Rol supplierRole;
+    Optional<Rol> existingSupplierRole = rolRepository.findByName("PROVEEDOR");
+    
+    if (existingSupplierRole.isEmpty()) {
+        supplierRole = new Rol();
+        supplierRole.setId(3L); // 👈 Asumimos ID 3
+        supplierRole.setName("PROVEEDOR");
+        supplierRole = rolRepository.save(supplierRole);
+    } else {
+        supplierRole = existingSupplierRole.get();
     }
+
+    // 2. Crear un Proveedor de prueba
+    String supplierUsername = "prov123";
+    if (userRepository.findByIdentification(supplierUsername).isEmpty()) {
+        User supplierUser = new User();
+        supplierUser.setIdentification(supplierUsername);
+        supplierUser.setNames("Proveedor De Prueba");
+        supplierUser.setLastNames("S.A.S");
+        supplierUser.setEmail("compras@proveedor.com");
+        supplierUser.setPassword(null); // 👈 Sin contraseña
+        supplierUser.getRols().add(supplierRole);
+        userRepository.save(supplierUser);
+        System.out.println(">>> Usuario 'prov123' (PROVEEDOR) creado <<<");
+    }
+}
 }

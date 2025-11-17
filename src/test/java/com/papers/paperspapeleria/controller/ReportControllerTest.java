@@ -61,4 +61,29 @@ public class ReportControllerTest {
         .andExpect(jsonPath("$.length()").value(2))
         .andExpect(jsonPath("$[0].nombres").value("Cliente Prueba"));
     }
+
+    // En ReportControllerTest.java
+
+    @Test
+    @WithMockUser // Simula logueado
+    void testGetListadoProveedores() throws Exception {
+        // 1. Arrange
+        UserDTO proveedor1 = new UserDTO();
+        proveedor1.setIdentificacion("9001");
+        proveedor1.setNombres("Proveedor Prueba");
+
+        List<UserDTO> mockResponse = List.of(proveedor1);
+
+        // 2. Simular el nuevo método del servicio
+        when(reportService.getListSupplier()).thenReturn(mockResponse); // 👈 Fallará (no existe)
+
+        // 3. Act & Assert
+        mockMvc.perform(
+                get("/api/reportes/listado-proveedores") // 👈 Endpoint nuevo
+                        .contentType(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(1))
+        .andExpect(jsonPath("$[0].nombres").value("Proveedor Prueba"));
+    }
 }
