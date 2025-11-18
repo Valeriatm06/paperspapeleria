@@ -82,6 +82,7 @@ public class SecurityConfig {
                 // --- Rutas de Ventas ---
                 // Permitir todas las operaciones de Ventas sin autenticación (TEMPORAL y MUY PELIGROSO)
                 .requestMatchers("/api/ventas", "/api/ventas/**").permitAll()
+                .requestMatchers("/api/reportes/**").permitAll()
                 
                 // --- Cualquier otra ruta ---
                 // Cualquier otra petición no especificada explícitamente, SÍ requiere autenticación.
