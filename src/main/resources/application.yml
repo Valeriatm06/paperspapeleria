@@ -1,0 +1,24 @@
+# src/main/resources/application.yml
+
+spring:
+  # --- 1. Configuración de la Base de Datos (MySQL/XAMPP) ---
+  datasource:
+    # Asegúrate de que "paperspapeleria" sea el nombre que creaste
+    url: jdbc:mysql://localhost:3306/paperspapeleria
+    username: root
+    password: ""  # Importante: comillas vacías si no tienes contraseña
+  
+  # --- 2. Configuración de JPA (Hibernate) ---
+  jpa:
+    # Le dice a Hibernate que hable en dialecto de MySQL
+    database-platform: org.hibernate.dialect.MySQLDialect
+    
+    hibernate:
+      # "update" -> Hibernate creará/modificará las tablas automáticamente
+      ddl-auto: update
+      
+    # "true" -> Muestra en la consola el SQL que Hibernate está ejecutando
+    show-sql: true
+
+jwt:
+  secret: ESTAESMICLAVESECRETAQUEESMUYLARGAYSEGURAPARAFIRMARMISTOKENS

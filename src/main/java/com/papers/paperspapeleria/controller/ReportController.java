@@ -1,0 +1,70 @@
+package com.papers.paperspapeleria.controller;
+
+import com.papers.paperspapeleria.dto.ExpensesPerCategoryDTO;
+import com.papers.paperspapeleria.dto.PurchaseInvoiceDetailDTO;
+import com.papers.paperspapeleria.dto.PurchaseReportDTO;
+import com.papers.paperspapeleria.dto.SaleInvoiceDetailDTO;
+import com.papers.paperspapeleria.dto.SaleReportDTO;
+import com.papers.paperspapeleria.dto.UserDTO;
+import com.papers.paperspapeleria.service.ReportService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/reportes") // 👈 Mapeo base
+public class ReportController {
+
+    private final ReportService reportService;
+
+    @Autowired
+    public ReportController(ReportService reportService) {
+        this.reportService = reportService;
+    }
+
+    @GetMapping("/listado-clientes") // 👈 Endpoint específico
+    public ResponseEntity<List<UserDTO>> getListClients() {
+        List<UserDTO> clientes = reportService.getListClients();
+        return ResponseEntity.ok(clientes);
+    }
+
+    @GetMapping("/listado-proveedores") // 👈 AÑADIR ENDPOINT
+    public ResponseEntity<List<UserDTO>> getListadoProveedores() {
+        List<UserDTO> proveedores = reportService.getListSupplier();
+        return ResponseEntity.ok(proveedores);
+    }
+
+    @GetMapping("/gastos-por-categoria") // 👈 AÑADIR ENDPOINT
+    public ResponseEntity<List<ExpensesPerCategoryDTO>> getGastosPorCategoria() {
+        List<ExpensesPerCategoryDTO> gastos = reportService.getExpensesPerCategory();
+        return ResponseEntity.ok(gastos);
+    }
+
+    @GetMapping("/reporte-compras") // 👈 Nuevo endpoint
+    public ResponseEntity<List<PurchaseReportDTO>> getReporteCompras() {
+        List<PurchaseReportDTO> purchases = reportService.getPurchaseReport();
+        return ResponseEntity.ok(purchases);
+    }
+
+    @GetMapping("/facturas-compra")
+    public ResponseEntity<List<PurchaseInvoiceDetailDTO>> getReporteFacturasCompra() {
+        List<PurchaseInvoiceDetailDTO> facturas = reportService.getReporteFacturasCompra();
+        return ResponseEntity.ok(facturas);
+    }
+
+    @GetMapping("/reporte-ventas")
+    public ResponseEntity<List<SaleReportDTO>> getReporteSales() {
+        List<SaleReportDTO> sales = reportService.getReporteSales();
+        return ResponseEntity.ok(sales);
+    }
+
+    @GetMapping("/facturas-venta")
+    public ResponseEntity<List<SaleInvoiceDetailDTO>> getReporteFacturasVenta() {
+        List<SaleInvoiceDetailDTO> facturas = reportService.getReporteFacturasVenta();
+        return ResponseEntity.ok(facturas);
+    }
+}
