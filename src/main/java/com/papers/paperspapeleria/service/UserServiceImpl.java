@@ -1,183 +1,126 @@
 package com.papers.paperspapeleria.service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.Set;
-import java.util.ArrayList;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.papers.paperspapeleria.dto.UserDTO;
-import com.papers.paperspapeleria.entity.Rol;
 import com.papers.paperspapeleria.entity.User;
 import com.papers.paperspapeleria.mapper.UserMapper;
-import com.papers.paperspapeleria.repository.RolRepository;
 import com.papers.paperspapeleria.repository.UserRepository;
-
-import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder; // 💡 Importar PasswordEncoder
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final RolRepository rolRepository;
+    private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder; // 💡 Inyectar PasswordEncoder
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, RolRepository rolRepository) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.rolRepository = rolRepository;
+        this.userMapper = userMapper;
+        this.passwordEncoder = passwordEncoder;
     }
-
-    @Autowired
-    private UserMapper userMapper;
 
     @Override
     @Transactional
     public UserDTO createUser(UserDTO userDTO) {
-        if (userRepository.existsById(userDTO.getIdentificacion())) {
-            throw new EntityExistsException("Ya existe un user con la identificación: " + userDTO.getIdentificacion());
+        // Verificar si ya existe un usuario con la misma identificación o username/email
+        if (userRepository.findByIdentification(userDTO.getIdentificacion()).isPresent()) {
+            throw new IllegalArgumentException("Ya existe un usuario con la identificación: " + userDTO.getIdentificacion());
         }
-        Set<String> rolesSolicitados = userDTO.getRoles();
-        if (rolesSolicitados.contains("ADMINISTRADOR") && rolesSolicitados.contains("EMPLEADO")) {
-            throw new IllegalArgumentException("Error: Una persona no puede ser Administrador y Empleado al mismo tiempo.");
+        if (userDTO.getUsername() != null && userRepository.findByUsername(userDTO.getUsername()).isPresent()) {
+             throw new IllegalArgumentException("Ya existe un usuario con el nombre de usuario: " + userDTO.getUsername());
         }
-        User newUser = new User();
-        newUser.setIdentification(userDTO.getIdentificacion());
-        newUser.setPersonType(userDTO.getTipoPersona());
-        newUser.setIdType(userDTO.getTipoIdentificacion());
-        newUser.setNames(userDTO.getNombres());
-        newUser.setLastNames(userDTO.getApellidos());
-        newUser.setCity(userDTO.getCiudad());
-        newUser.setAddress(userDTO.getDireccion());
-        newUser.setContactName(userDTO.getNombresContacto());
-        newUser.setContactLastName(userDTO.getApellidosContacto());
-        newUser.setEmail(userDTO.getEmail());
-        newUser.setPhoneNumber(userDTO.getTelefono());
-        newUser.setActive(true);
+        if (userDTO.getEmail() != null && userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
+             throw new IllegalArgumentException("Ya existe un usuario con el email: " + userDTO.getEmail());
+        }
 
-        Set<Rol> rolesEntidad = new HashSet<>();
-        for (String rolName : rolesSolicitados) {
-            Rol rol = rolRepository.findByName(rolName)
-                    .orElseThrow(() -> new EntityNotFoundException("El rol '" + rolName + "' no existe."));
-            rolesEntidad.add(rol);
-        }
-        newUser.setRols(rolesEntidad);
+        User user = userMapper.toEntity(userDTO);
         
-        if (rolesSolicitados.contains("EMPLEADO") || rolesSolicitados.contains("ADMINISTRADOR")) {
-            if (userDTO.getUsername() == null || userDTO.getPassword() == null) {
-                throw new IllegalArgumentException("El username y password son obligatorios para Empleados o Administradores.");
-            }
-            newUser.setUsername(userDTO.getUsername());
-            newUser.setPassword(userDTO.getPassword());
-        }
-
-        User savedUser = userRepository.save(newUser);
-
-        return convertTOEntityDTO(savedUser);
-    }
-    
-    private UserDTO convertTOEntityDTO(User user) {
-        UserDTO dto = new UserDTO();
-        dto.setIdentificacion(user.getIdentification());
-        dto.setTipoPersona(user.getPersonType());
-        dto.setTipoIdentificacion(user.getIdType());
-        dto.setNombres(user.getNames());
-        dto.setApellidos(user.getLastNames());
-        dto.setCiudad(user.getCity());
-        dto.setDireccion(user.getAddress());
-        dto.setNombresContacto(user.getContactName());
-        dto.setApellidosContacto(user.getContactLastName());
-        dto.setEmail(user.getEmail());
-        dto.setTelefono(user.getPhoneNumber());
-        dto.setUsername(user.getUsername());
-        dto.setPassword(null); 
-        dto.setActive(user.isActive());
-
-        dto.setRoles(
-            user.getRols().stream()
-                    .map(Rol::getName)
-                    .collect(Collectors.toSet())
-        );
-
-        return dto;
-    }
-
-    @Override
-    public List<UserDTO> listUsers() {
-        List<User> users = userRepository.findAll();
-        return users.stream()
-                .map(this::convertTOEntityDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public UserDTO getUserById(String id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + id));
-
-        return convertTOEntityDTO(user);
-    }
-
-    @Override
-    public UserDTO upDateUser(String id, UserDTO userDTO) {
-        User actualUser = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Tercero no encontrado con ID: " + id));
-
-        Set<String> askedRoles = userDTO.getRoles();
-        if (askedRoles.contains("ADMINISTRADOR") && askedRoles.contains("EMPLEADO")) {
-            throw new IllegalArgumentException("Error: Una persona no puede ser Administrador y Empleado al mismo tiempo.");
-        }
-        
-        actualUser.setPersonType(userDTO.getTipoPersona());
-        actualUser.setIdType(userDTO.getTipoIdentificacion());
-        actualUser.setNames(userDTO.getNombres());
-        actualUser.setLastNames(userDTO.getApellidos());
-        actualUser.setCity(userDTO.getCiudad());
-        actualUser.setAddress(userDTO.getDireccion());
-        actualUser.setContactName(userDTO.getNombresContacto());
-        actualUser.setContactLastName(userDTO.getApellidosContacto());
-        actualUser.setEmail(userDTO.getEmail());
-        actualUser.setPhoneNumber(userDTO.getTelefono());
-        actualUser.setActive(userDTO.isActive());
-
-        Set<Rol> entityRoles = new HashSet<>();
-        for (String rolName : askedRoles) {
-            Rol rol = rolRepository.findByName(rolName)
-                    .orElseThrow(() -> new EntityNotFoundException("El rol '" + rolName + "' no existe."));
-            entityRoles.add(rol);
-        }
-        actualUser.setRols(entityRoles);
-
+        // 💡 Encriptar la contraseña si se proporciona
         if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
-            actualUser.setPassword(userDTO.getPassword());
+            user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        } else if (userDTO.getRoles().contains("EMPLEADO")) {
+            // Si es un empleado, la contraseña es obligatoria al crear
+             throw new IllegalArgumentException("La contraseña es obligatoria para usuarios tipo EMPLEADO.");
         }
-        actualUser.setUsername(userDTO.getUsername());
+        // Para clientes/proveedores que no tienen credenciales de login, la contraseña puede ser null
 
-        User upDatedUser = userRepository.save(actualUser);
-
-        return convertTOEntityDTO(upDatedUser);
+        User savedUser = userRepository.save(user);
+        return userMapper.toDTO(savedUser);
     }
 
     @Override
-    public void deleteUser(String id) {
-        if (!userRepository.existsById(id)) {
-            throw new EntityNotFoundException("Tercero no encontrado con ID: " + id + ". No se pudo eliminar.");
-        }
-        userRepository.deleteById(id);
-    }
-
-    @Override
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
-    public List<UserDTO> findUsersByRole(String roleName) {
-        List<User> users = userRepository.findByRols_Name(roleName); 
-        return users.stream()
+    @Transactional(readOnly = true)
+    public List<UserDTO> listUsers() {
+        // Filtrar aquí si no quieres el rol "ADMIN" en la lista general
+        return userRepository.findAll().stream()
+                .filter(user -> user.getRols().stream().noneMatch(rol -> rol.getName().equals("ADMIN"))) // 💡 Filtrar ADMIN
                 .map(userMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public UserDTO getUserById(String id) {
+        return userRepository.findByIdentification(id)
+                .map(userMapper::toDTO)
+                .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + id));
+    }
+
+    @Override
+    @Transactional
+    public UserDTO upDateUser(String id, UserDTO userDTO) {
+        User existingUser = userRepository.findByIdentification(id)
+                .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + id));
+        
+        // Verificar si el username o email ya existen en otro usuario (que no sea el actual)
+        if (userDTO.getUsername() != null && !userDTO.getUsername().equals(existingUser.getUsername())) {
+            if (userRepository.findByUsername(userDTO.getUsername()).isPresent()) {
+                throw new IllegalArgumentException("El nombre de usuario ya está en uso por otro usuario.");
+            }
+        }
+        if (userDTO.getEmail() != null && !userDTO.getEmail().equals(existingUser.getEmail())) {
+            if (userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
+                throw new IllegalArgumentException("El email ya está en uso por otro usuario.");
+            }
+        }
+
+        // 💡 Actualizar la contraseña si se proporciona en el DTO
+        if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
+            existingUser.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        }
+
+        // 💡 Usar el método updateEntityFromDTO para actualizar los otros campos
+        userMapper.updateEntityFromDTO(userDTO, existingUser);
+
+        User updatedUser = userRepository.save(existingUser);
+        return userMapper.toDTO(updatedUser);
+    }
+
+    @Override
+    @Transactional
+    public void deleteUser(String id) {
+        User user = userRepository.findByIdentification(id)
+                .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + id));
+        userRepository.delete(user);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserDTO> findUsersByRole(String roleName) {
+        // 💡 IMPLEMENTACIÓN: Buscar por nombre de rol y mapear a DTOs
+        // Asegúrate de que no estás filtrando 'ADMIN' si lo que buscas es 'ADMIN'
+        return userRepository.findByRols_Name(roleName).stream()
+                .filter(user -> user.getRols().stream().noneMatch(rol -> rol.getName().equals("ADMIN") && !roleName.equals("ADMIN"))) // No mostrar admin a menos que se busque admin explícitamente
+                .map(userMapper::toDTO)
+                .collect(Collectors.toList());
+    }
 }

@@ -51,6 +51,7 @@ public class UserController {
 
     @GetMapping("/rol/{roleName}")
     public ResponseEntity<List<UserDTO>> getUsersByRole(@PathVariable String roleName) {
+        
         List<UserDTO> users = userService.findUsersByRole(roleName); // Necesitarás crear este método en el servicio
         if (users.isEmpty()) {
             return ResponseEntity.noContent().build();
