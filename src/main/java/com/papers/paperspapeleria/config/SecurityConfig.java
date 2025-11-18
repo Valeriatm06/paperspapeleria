@@ -50,6 +50,13 @@ public class SecurityConfig {
             .cors(Customizer.withDefaults()) // Habilita CORS con configuración por defecto
             .csrf(AbstractHttpConfigurer::disable) // Deshabilita CSRF (común en APIs REST con JWT)
             .authorizeHttpRequests(auth -> auth
+                 // LÍNEAS DE SWAGGER 
+                .requestMatchers(
+                    "/v3/api-docs/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html"
+                ).permitAll()
+                // FIN LÍNEAS DE SWAGGER 👆
                 // --- Rutas de Autenticación (Públicas) ---
                 .requestMatchers("/api/auth/**").permitAll() 
                 
@@ -75,6 +82,7 @@ public class SecurityConfig {
                 // --- Rutas de Ventas ---
                 // Permitir todas las operaciones de Ventas sin autenticación (TEMPORAL y MUY PELIGROSO)
                 .requestMatchers("/api/ventas", "/api/ventas/**").permitAll()
+                .requestMatchers("/api/reportes/**").permitAll()
                 
                 // --- Cualquier otra ruta ---
                 // Cualquier otra petición no especificada explícitamente, SÍ requiere autenticación.
