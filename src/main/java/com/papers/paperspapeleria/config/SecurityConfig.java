@@ -50,6 +50,13 @@ public class SecurityConfig {
             .cors(Customizer.withDefaults()) // Habilita CORS con configuración por defecto
             .csrf(AbstractHttpConfigurer::disable) // Deshabilita CSRF (común en APIs REST con JWT)
             .authorizeHttpRequests(auth -> auth
+                 // LÍNEAS DE SWAGGER 
+                .requestMatchers(
+                    "/v3/api-docs/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html"
+                ).permitAll()
+                // FIN LÍNEAS DE SWAGGER 👆
                 // --- Rutas de Autenticación (Públicas) ---
                 .requestMatchers("/api/auth/**").permitAll() 
                 
